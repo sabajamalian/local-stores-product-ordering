@@ -203,7 +203,13 @@ class _ProductCard extends StatefulWidget {
 }
 
 class _ProductCardState extends State<_ProductCard> {
-  int _quantity = 1;
+  late int _quantity;
+
+  @override
+  void initState() {
+    super.initState();
+    _quantity = widget.product.minimumOrderQuantity;
+  }
 
   void _add(int quantity) {
     final product = widget.product;
@@ -219,7 +225,7 @@ class _ProductCardState extends State<_ProductCard> {
   }
 
   void _showDetails() {
-    var quantity = _quantity;
+    var quantity = widget.product.minimumOrderQuantity;
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -237,7 +243,7 @@ class _ProductCardState extends State<_ProductCard> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: IconButton(
-                    tooltip: 'Close product details',
+                    tooltip: 'Close product details for ${widget.product.name}',
                     onPressed: () => Navigator.of(sheetContext).pop(),
                     icon: const Icon(Icons.close),
                   ),
@@ -258,6 +264,13 @@ class _ProductCardState extends State<_ProductCard> {
                   '${formatCents(widget.product.priceCents)} / ${widget.product.unit}',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
+                if (widget.product.minimumOrderQuantity > 1) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Minimum order: ${widget.product.minimumOrderQuantity} '
+                    '${widget.product.unit.startsWith('box') ? 'boxes' : 'cases'}',
+                  ),
+                ],
                 const SizedBox(height: 16),
                 Text(
                   widget.product.description.isEmpty
@@ -275,22 +288,25 @@ class _ProductCardState extends State<_ProductCard> {
                   incrementKey: Key('detail-increment-${widget.product.id}'),
                   decrementKey: Key('detail-decrement-${widget.product.id}'),
                   onIncrement: () => setSheetState(() => quantity++),
-                  onDecrement: quantity > 1
+                  onDecrement: quantity > widget.product.minimumOrderQuantity
                       ? () => setSheetState(() => quantity--)
                       : null,
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  child: FilledButton(
-                    key: Key('detail-add-${widget.product.id}'),
-                    onPressed: () {
-                      _add(quantity);
-                      setState(() => _quantity = quantity);
-                      Navigator.of(sheetContext).pop();
-                    },
-                    child: Text(
-                      'Add to cart / ${formatCents(widget.product.priceCents * quantity)}',
+                  child: Tooltip(
+                    message: 'Add ${widget.product.name} to cart',
+                    child: FilledButton(
+                      key: Key('detail-add-${widget.product.id}'),
+                      onPressed: () {
+                        _add(quantity);
+                        setState(() => _quantity = quantity);
+                        Navigator.of(sheetContext).pop();
+                      },
+                      child: Text(
+                        'Add to cart / ${formatCents(widget.product.priceCents * quantity)}',
+                      ),
                     ),
                   ),
                 ),
@@ -314,12 +330,15 @@ class _ProductCardState extends State<_ProductCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        InkWell(
-          onTap: _showDetails,
-          borderRadius: BorderRadius.circular(4),
-          child: ClipRRect(
+        Tooltip(
+          message: 'View details for ${product.name}',
+          child: InkWell(
+            onTap: _showDetails,
             borderRadius: BorderRadius.circular(4),
-            child: ProductImage(product: product, height: 180),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: ProductImage(product: product, height: 180),
+            ),
           ),
         ),
         Padding(
@@ -340,6 +359,13 @@ class _ProductCardState extends State<_ProductCard> {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
+              if (product.minimumOrderQuantity > 1) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Minimum order: ${product.minimumOrderQuantity} '
+                  '${product.unit.startsWith('box') ? 'boxes' : 'cases'}',
+                ),
+              ],
               const SizedBox(height: 8),
               Wrap(
                 spacing: 12,
@@ -351,10 +377,13 @@ class _ProductCardState extends State<_ProductCard> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  TextButton(
-                    key: Key('details-${product.id}'),
-                    onPressed: _showDetails,
-                    child: const Text('View details'),
+                  Tooltip(
+                    message: 'View details for ${product.name}',
+                    child: TextButton(
+                      key: Key('details-${product.id}'),
+                      onPressed: _showDetails,
+                      child: const Text('View details'),
+                    ),
                   ),
                 ],
               ),
@@ -371,14 +400,17 @@ class _ProductCardState extends State<_ProductCard> {
                     incrementKey: Key('select-increment-${product.id}'),
                     decrementKey: Key('select-decrement-${product.id}'),
                     onIncrement: () => setState(() => _quantity++),
-                    onDecrement: _quantity > 1
+                    onDecrement: _quantity > product.minimumOrderQuantity
                         ? () => setState(() => _quantity--)
                         : null,
                   ),
-                  FilledButton(
-                    key: Key('add-${product.id}'),
-                    onPressed: () => _add(_quantity),
-                    child: const Text('Add'),
+                  Tooltip(
+                    message: 'Add ${product.name} to cart',
+                    child: FilledButton(
+                      key: Key('add-${product.id}'),
+                      onPressed: () => _add(_quantity),
+                      child: const Text('Add'),
+                    ),
                   ),
                   if (inCart > 0) ...[
                     const SizedBox(height: 8),
