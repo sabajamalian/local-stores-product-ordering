@@ -17,8 +17,16 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    await tester.ensureVisible(find.byKey(const Key('add-cola-600')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('add-cola-600')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('add-water-1l')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('add-water-1l')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('add-water-1l')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('add-water-1l')));
     await tester.pumpAndSettle();
 
@@ -26,6 +34,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // 288.00 + 2 * 96.00
+    await tester.ensureVisible(find.byKey(const Key('cart-total')));
+    await tester.pumpAndSettle();
     expect(find.text(r'Total: $480.00'), findsOneWidget);
     await binding.takeScreenshot('cart');
 

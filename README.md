@@ -1,9 +1,39 @@
 # local-stores-product-ordering
 
-A simple Flutter app that lets local stores browse products, build a cart, and place an order.
+A Flutter storefront that lets local stores browse products and build wholesale orders.
 It targets Android, iOS, and web.
 
 **Live web preview:** https://sabajamalian.github.io/local-stores-product-ordering/
+
+## Storefront
+
+The responsive catalog has bundled product photos, searchable descriptions,
+category filters, and a product-detail sheet. Choose a quantity before adding to the cart,
+then adjust quantities or remove products from the cart. Prices and quantities are per
+case or box, not per individual bottle or pack.
+
+The five product photos in `assets/products/` work offline and don't
+depend on an external image service at runtime. They show product types, not the exact
+brand, packaging, or pack size being ordered.
+Add `description`, `category`, and `imageAsset` to a catalog entry in
+`lib/models/product.dart` to supply its details and image.
+
+### Photo sources
+
+The catalog photos are from Unsplash and used under the
+[Unsplash License](https://unsplash.com/license).
+These are bundled editorial examples, not supplier-provided product photography.
+
+| Asset | Source |
+| --- | --- |
+| Cola | [Original photo](https://images.unsplash.com/photo-1622483767028-3f66f32aef97) |
+| Water | [Original photo](https://images.unsplash.com/photo-1523362628745-0c100150b504) |
+| Orange juice | [Original photo](https://images.unsplash.com/photo-1600271886742-f049cd451bba) |
+| Snacks | [Original photo](https://images.unsplash.com/photo-1566478989037-eec170784d0b) |
+| Cookies | [Original photo](https://images.unsplash.com/photo-1499636136210-6f4ee915583e) |
+
+This is an in-memory demo. Checkout shows a confirmation and clears the cart; it doesn't
+send orders, take payment, or arrange delivery. Cart contents reset when the app restarts.
 
 ## What happens on every push to `main`
 
@@ -58,6 +88,8 @@ lib/
   state/cart.dart                Cart (ChangeNotifier)
   screens/product_list_screen.dart
   screens/cart_screen.dart
+  widgets/                       shared product images and quantity controls
+assets/products/                 bundled representative product photos
 test/                            unit and widget tests
 integration_test/app_test.dart   end-to-end flow run on emulator and simulator
 test_driver/integration_test.dart  saves screenshots from flutter drive

@@ -12,14 +12,21 @@ class Cart extends ChangeNotifier {
 
   int get itemCount => _quantities.values.fold(0, (sum, q) => sum + q);
 
-  int get totalCents => _products.values
-      .fold(0, (sum, p) => sum + p.priceCents * quantityOf(p));
+  int get totalCents =>
+      _products.values.fold(0, (sum, p) => sum + p.priceCents * quantityOf(p));
 
   bool get isEmpty => _quantities.isEmpty;
 
-  void add(Product product) {
+  void add(Product product, {int quantity = 1}) {
+    if (quantity <= 0) {
+      throw ArgumentError.value(quantity, 'quantity', 'Must be positive');
+    }
     _products[product.id] = product;
-    _quantities.update(product.id, (q) => q + 1, ifAbsent: () => 1);
+    _quantities.update(
+      product.id,
+      (q) => q + quantity,
+      ifAbsent: () => quantity,
+    );
     notifyListeners();
   }
 
