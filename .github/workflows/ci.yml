@@ -68,10 +68,20 @@ jobs:
         if: always()
         with:
           name: android-build
-          path: |
-            build/app/outputs/flutter-apk/app-debug.apk
-            build/screenshots/
+          path: build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: warn
+      - name: Verify screenshots
+        run: |
+          for screen in catalog product-details cart order-confirmation; do
+            test -s "build/screenshots/$screen.png" || { echo "::error::Missing screenshot: $screen"; exit 1; }
+          done
+      - name: Upload Android screenshots
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: android-screenshots
+          path: build/screenshots/*.png
+          if-no-files-found: error
 
   ios:
     name: iOS simulator
@@ -109,10 +119,20 @@ jobs:
         if: always()
         with:
           name: ios-simulator-build
-          path: |
-            build/Runner-simulator.zip
-            build/screenshots/
+          path: build/Runner-simulator.zip
           if-no-files-found: warn
+      - name: Verify screenshots
+        run: |
+          for screen in catalog product-details cart order-confirmation; do
+            test -s "build/screenshots/$screen.png" || { echo "::error::Missing screenshot: $screen"; exit 1; }
+          done
+      - name: Upload iOS screenshots
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ios-screenshots
+          path: build/screenshots/*.png
+          if-no-files-found: error
 
   web:
     name: Web build

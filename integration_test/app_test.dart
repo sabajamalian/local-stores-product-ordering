@@ -17,6 +17,16 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    await binding.takeScreenshot('catalog');
+    await tester.ensureVisible(find.byKey(const Key('details-cola-600')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('details-cola-600')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('detail-add-cola-600')), findsOneWidget);
+    await binding.takeScreenshot('product-details');
+    await tester.tap(find.byTooltip('Close product details'));
+    await tester.pumpAndSettle();
+
     await tester.ensureVisible(find.byKey(const Key('add-cola-600')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('add-cola-600')));
@@ -43,6 +53,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Order placed'), findsOneWidget);
     expect(find.text(r'3 items, total $480.00.'), findsOneWidget);
+    await binding.takeScreenshot('order-confirmation');
 
     await tester.tap(find.byKey(const Key('order-confirm-ok')));
     await tester.pumpAndSettle();

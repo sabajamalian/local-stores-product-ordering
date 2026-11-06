@@ -53,8 +53,13 @@ Pull requests run the same checks but don't deploy.
 
 Open a run under the **Actions** tab. The run summary has these artifacts:
 
-- `android-build`: `app-debug.apk` (install with `adb install`) and screenshots taken on the emulator
-- `ios-simulator-build`: `Runner-simulator.zip` (unzip, then `xcrun simctl install booted Runner.app`) and screenshots taken on the simulator
+- `android-build`: `app-debug.apk` (install with `adb install`)
+- `ios-simulator-build`: `Runner-simulator.zip` (unzip, then `xcrun simctl install booted Runner.app`)
+- `android-screenshots` and `ios-screenshots`: four PNGs captured during the integration
+  test on each platform: catalog, product details, cart, and order confirmation
+
+The mobile jobs require all four screenshots. If a test fails, any screenshots captured
+before the failure are still uploaded.
 
 ### Limits
 
