@@ -108,7 +108,8 @@ jobs:
       - name: Build for simulator
         run: flutter build ios --simulator --debug
       - name: Run integration test on simulator
-        run: flutter drive --driver=test_driver/integration_test.dart --target=integration_test/app_test.dart -d ${{ steps.sim.outputs.udid }}
+        timeout-minutes: 12
+        run: flutter drive -v --driver=test_driver/integration_test.dart --target=integration_test/app_test.dart -d ${{ steps.sim.outputs.udid }} 2>&1 | grep -v -E '^\s*<|^\s*</|plist' 
       - name: Zip Runner.app
         if: always()
         run: |
