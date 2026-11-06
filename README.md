@@ -12,6 +12,14 @@ category filters, and a product-detail sheet. Choose a quantity before adding to
 then adjust quantities or remove products from the cart. Prices and quantities are per
 case or box, not per individual bottle or pack.
 
+Products may require a minimum order quantity (default: 1 case or box). Higher
+minimums are shown on product cards, in details, and in the cart. Cola requires
+2 cases, Still Water 3 cases, and Potato Chips 2 boxes; other sample products
+require 1. Card and detail selectors start at the minimum and cannot go below it.
+The cart raises a first addition to at least the minimum; later additions add the
+chosen count. Decrementing a cart line at its minimum removes the whole line.
+Checkout blocks any line below its minimum and asks you to update or remove it.
+
 The five product photos in `assets/products/` work offline and don't
 depend on an external image service at runtime. They show product types, not the exact
 brand, packaging, or pack size being ordered.

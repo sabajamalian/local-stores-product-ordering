@@ -4,6 +4,7 @@ class Product {
     required this.name,
     required this.unit,
     required this.priceCents,
+    this.minimumOrderQuantity = 1,
     this.description = '',
     this.category = 'Other',
     this.imageAsset,
@@ -13,6 +14,7 @@ class Product {
   final String name;
   final String unit;
   final int priceCents;
+  final int minimumOrderQuantity;
   final String description;
   final String category;
   final String? imageAsset;
@@ -24,6 +26,7 @@ const sampleCatalog = <Product>[
     name: 'Cola 600 ml',
     unit: 'case of 24',
     priceCents: 28800,
+    minimumOrderQuantity: 2,
     category: 'Beverages',
     imageAsset: 'assets/products/cola.jpg',
     description:
@@ -35,6 +38,7 @@ const sampleCatalog = <Product>[
     name: 'Still Water 1 L',
     unit: 'case of 12',
     priceCents: 9600,
+    minimumOrderQuantity: 3,
     category: 'Beverages',
     imageAsset: 'assets/products/water.jpg',
     description:
@@ -46,6 +50,7 @@ const sampleCatalog = <Product>[
     name: 'Orange Juice 1 L',
     unit: 'case of 12',
     priceCents: 21600,
+    minimumOrderQuantity: 1,
     category: 'Beverages',
     imageAsset: 'assets/products/juice.jpg',
     description:
@@ -57,6 +62,7 @@ const sampleCatalog = <Product>[
     name: 'Potato Chips 45 g',
     unit: 'box of 30',
     priceCents: 15000,
+    minimumOrderQuantity: 2,
     category: 'Snacks',
     imageAsset: 'assets/products/chips.jpg',
     description:
@@ -68,6 +74,7 @@ const sampleCatalog = <Product>[
     name: 'Chocolate Cookies 90 g',
     unit: 'box of 24',
     priceCents: 16800,
+    minimumOrderQuantity: 1,
     category: 'Snacks',
     imageAsset: 'assets/products/cookies.jpg',
     description:

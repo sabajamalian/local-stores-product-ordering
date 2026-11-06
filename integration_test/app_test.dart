@@ -24,7 +24,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('detail-add-cola-600')), findsOneWidget);
     await binding.takeScreenshot('product-details');
-    await tester.tap(find.byTooltip('Close product details'));
+    await tester.ensureVisible(
+      find.byTooltip('Close product details for Cola 600 ml'),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Close product details for Cola 600 ml'));
     await tester.pumpAndSettle();
 
     await tester.ensureVisible(find.byKey(const Key('add-cola-600')));
@@ -35,26 +39,38 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('add-water-1l')));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byKey(const Key('add-water-1l')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('add-water-1l')));
-    await tester.pumpAndSettle();
 
+    expect(tester.widget<Text>(find.byKey(const Key('cart-count'))).data, '5');
+    await tester.ensureVisible(find.byKey(const Key('open-cart')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('open-cart')));
     await tester.pumpAndSettle();
 
-    // 288.00 + 2 * 96.00
+    expect(
+      tester.widget<Text>(find.byKey(const Key('qty-cola-600'))).data,
+      '2',
+    );
+    expect(
+      tester.widget<Text>(find.byKey(const Key('qty-water-1l'))).data,
+      '3',
+    );
+    expect(find.text('2 products / 5 cases and boxes'), findsOneWidget);
+    // 2 * 288.00 + 3 * 96.00
     await tester.ensureVisible(find.byKey(const Key('cart-total')));
     await tester.pumpAndSettle();
-    expect(find.text(r'Total: $480.00'), findsOneWidget);
+    expect(find.text(r'Total: $864.00'), findsOneWidget);
     await binding.takeScreenshot('cart');
 
+    await tester.ensureVisible(find.byKey(const Key('place-order')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('place-order')));
     await tester.pumpAndSettle();
     expect(find.text('Order placed'), findsOneWidget);
-    expect(find.text(r'3 items, total $480.00.'), findsOneWidget);
+    expect(find.text(r'5 items, total $864.00.'), findsOneWidget);
     await binding.takeScreenshot('order-confirmation');
 
+    await tester.ensureVisible(find.byKey(const Key('order-confirm-ok')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('order-confirm-ok')));
     await tester.pumpAndSettle();
     expect(find.text('Products'), findsOneWidget);

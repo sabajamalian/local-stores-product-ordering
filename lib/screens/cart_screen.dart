@@ -11,6 +11,22 @@ class CartScreen extends StatelessWidget {
 
   Future<void> _placeOrder(BuildContext context) async {
     final cart = context.read<Cart>();
+    if (!cart.meetsMinimumOrderQuantities) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Semantics(
+              liveRegion: true,
+              child: const Text(
+                'Some products are below their minimum order quantity. '
+                'Update or remove them before checkout.',
+              ),
+            ),
+          ),
+        );
+      return;
+    }
     final total = formatCents(cart.totalCents);
     final items = cart.itemCount;
     await showDialog<void>(
@@ -121,6 +137,14 @@ class CartScreen extends StatelessWidget {
                                         Text(
                                           '${formatCents(product.priceCents)} / ${product.unit}',
                                         ),
+                                        if (product.minimumOrderQuantity >
+                                            1) ...[
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Minimum order: ${product.minimumOrderQuantity} '
+                                            '${product.unit.startsWith('box') ? 'boxes' : 'cases'}',
+                                          ),
+                                        ],
                                         const SizedBox(height: 16),
                                         Wrap(
                                           spacing: 16,
@@ -155,15 +179,21 @@ class CartScreen extends StatelessWidget {
                                               style:
                                                   theme.textTheme.titleMedium,
                                             ),
-                                            TextButton.icon(
-                                              key: Key('remove-${product.id}'),
-                                              onPressed: () =>
-                                                  cart.remove(product),
-                                              icon: const Icon(
-                                                Icons.delete_outline,
-                                                size: 18,
+                                            Tooltip(
+                                              message:
+                                                  'Remove ${product.name} from cart',
+                                              child: TextButton.icon(
+                                                key: Key(
+                                                  'remove-${product.id}',
+                                                ),
+                                                onPressed: () =>
+                                                    cart.remove(product),
+                                                icon: const Icon(
+                                                  Icons.delete_outline,
+                                                  size: 18,
+                                                ),
+                                                label: const Text('Remove'),
                                               ),
-                                              label: const Text('Remove'),
                                             ),
                                           ],
                                         ),

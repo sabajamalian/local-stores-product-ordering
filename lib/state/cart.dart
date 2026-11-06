@@ -17,22 +17,45 @@ class Cart extends ChangeNotifier {
 
   bool get isEmpty => _quantities.isEmpty;
 
+  bool get meetsMinimumOrderQuantities => products.every(
+    (product) =>
+        product.minimumOrderQuantity > 0 &&
+        quantityOf(product) >= product.minimumOrderQuantity,
+  );
+
+  void _validateMinimum(Product product) {
+    if (product.minimumOrderQuantity <= 0) {
+      throw ArgumentError.value(
+        product.minimumOrderQuantity,
+        'minimumOrderQuantity',
+        'Must be positive',
+      );
+    }
+  }
+
   void add(Product product, {int quantity = 1}) {
+    _validateMinimum(product);
     if (quantity <= 0) {
       throw ArgumentError.value(quantity, 'quantity', 'Must be positive');
     }
-    _products[product.id] = product;
+    // Keep the product (and its MOQ) that established the line.
+    _products.putIfAbsent(product.id, () => product);
     _quantities.update(
       product.id,
       (q) => q + quantity,
-      ifAbsent: () => quantity,
+      ifAbsent: () => quantity < product.minimumOrderQuantity
+          ? product.minimumOrderQuantity
+          : quantity,
     );
     notifyListeners();
   }
 
   void decrement(Product product) {
+    _validateMinimum(product);
+    final storedProduct = _products[product.id];
+    if (storedProduct == null) return;
     final current = quantityOf(product);
-    if (current <= 1) {
+    if (current - 1 < storedProduct.minimumOrderQuantity) {
       remove(product);
       return;
     }
@@ -41,12 +64,15 @@ class Cart extends ChangeNotifier {
   }
 
   void remove(Product product) {
+    _validateMinimum(product);
+    if (!_quantities.containsKey(product.id)) return;
     _quantities.remove(product.id);
     _products.remove(product.id);
     notifyListeners();
   }
 
   void clear() {
+    if (isEmpty) return;
     _quantities.clear();
     _products.clear();
     notifyListeners();
