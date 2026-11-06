@@ -1,0 +1,56 @@
+name: Feature request
+description: Ask for a change to the storefront. Copilot's planner agent turns it into a plan for review.
+title: "[Feature]: "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        After you submit, assign this issue to **Copilot** and choose the **planner** agent.
+        It opens a plan PR for human review. Implementation starts only after the plan is
+        approved and the issue has the `plan-approved` label.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Who is affected and what can't they do today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: What should the app do instead?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: One testable statement per line.
+      placeholder: |
+        - [ ] ...
+    validations:
+      required: true
+  - type: checkboxes
+    id: platforms
+    attributes:
+      label: Platforms
+      options:
+        - label: Android
+        - label: iOS
+        - label: Web
+  - type: dropdown
+    id: business-rule
+    attributes:
+      label: Does this change prices, quantities, or order totals?
+      options:
+        - "Yes"
+        - "No"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Out of scope and notes

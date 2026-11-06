@@ -35,6 +35,45 @@ These are bundled editorial examples, not supplier-provided product photography.
 This is an in-memory demo. Checkout shows a confirmation and clears the cart; it doesn't
 send orders, take payment, or arrange delivery. Cart contents reset when the app restarts.
 
+## How work flows in this repo
+
+Features go from issue to production through Copilot agents, with humans approving at each
+gate:
+
+```mermaid
+flowchart LR
+  A[Feature issue<br/>from issue form] --> B[planner agent<br/>researches, writes plan]
+  B --> C{Human reviews<br/>plan PR}
+  C -- changes --> B
+  C -- merge + plan-approved --> D[implementer agent<br/>code + tests]
+  D --> E[CI: analyze, tests,<br/>Android, iOS, web]
+  D --> F[Copilot code review]
+  E --> G{Human review<br/>and merge}
+  F --> G
+  G --> H[CI on main:<br/>artifacts + Pages deploy]
+```
+
+1. File a **Feature request** issue. Assign it to Copilot and choose the `planner` agent.
+2. The planner opens a PR with a plan in `docs/plans/`. Review it, ask for changes in PR
+   comments, then merge it and add the `plan-approved` label to the issue.
+3. Assign the issue to Copilot again and choose the `implementer` agent. It builds from the
+   merged plan and opens a PR that closes the issue.
+4. CI runs and Copilot code review comments on the PR. A human approves and merges.
+5. The push to `main` builds the Android and iOS artifacts and deploys the web preview.
+
+Agent behavior comes from these files:
+
+| File | Used by | Purpose |
+| --- | --- | --- |
+| `.github/instructions/org-standards.instructions.md` | All | Contoso Retail org standards (simulated in-repo) |
+| `.github/copilot-instructions.md` | All | Repo architecture, build, and conventions |
+| `.github/instructions/{dart,tests,workflows}.instructions.md` | All, by path | Rules for specific folders |
+| `.github/instructions/code-review.instructions.md` | Copilot code review | Review checklist |
+| `.github/agents/planner.agent.md` | Planner | Research and plan only |
+| `.github/agents/implementer.agent.md` | Implementer | Build from an approved plan |
+| `.github/workflows/copilot-setup-steps.yml` | Cloud agent | Installs Flutter for agent sessions on Actions |
+| `docs/plans/TEMPLATE.md` | Planner | Required plan format |
+
 ## What happens on every push to `main`
 
 The [CI workflow](.github/workflows/ci.yml) runs these jobs on GitHub-hosted runners:
@@ -98,4 +137,7 @@ assets/products/                 bundled representative product photos
 test/                            unit and widget tests
 integration_test/app_test.dart   end-to-end flow run on emulator and simulator
 test_driver/integration_test.dart  saves screenshots from flutter drive
+docs/plans/                      approved implementation plans
+.github/agents/                  Copilot custom agents (planner, implementer)
+.github/instructions/            org, path-specific, and code review instructions
 ```
