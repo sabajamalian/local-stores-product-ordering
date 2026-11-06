@@ -27,7 +27,7 @@ Baseline: `flutter pub get` succeeded; `flutter test` passed all 12 tests.
 
 ## 4. Proposed design
 - Model (`lib/models/`): Add an immutable `minimumOrderQuantity` integer to `Product`, defaulting to 1. Assign the specified values in `sampleCatalog`.
-- State and business rules (`lib/state/`): Make first-time `Cart.add` use at least the product MOQ, and make `Cart.decrement` remove a line when the next decrement would put it below the MOQ. Expose a state-level minimum-quantity validity check for checkout. Keep notification behavior to one notification for each state change.
+- State and business rules (`lib/state/`): Before mutating cart state, reject a product with a nonpositive MOQ using `ArgumentError`. Make first-time `Cart.add` use at least the product MOQ, and make `Cart.decrement` remove a line when the next decrement would put it below the MOQ. Expose a state-level minimum-quantity validity check for checkout. Keep notification behavior to one notification for each state change.
 - UI (`lib/screens/`, `lib/widgets/`): Initialize card and detail selector quantities to each product's MOQ, and disable their decrement control at the MOQ. Show “Minimum order: N cases” or “Minimum order: N boxes” on cards, in the detail sheet, and under cart lines only when MOQ > 1. Show the exact agreed checkout validation message in an accessible live region and block confirmation if cart validation fails. Keep the `QuantitySelector` generic and preserve all existing widget keys.
 - Docs (`README.md`): Explain that products may have minimum order quantities and that they are shown before adding to the cart.
 
@@ -43,14 +43,14 @@ Baseline: `flutter pub get` succeeded; `flutter test` passed all 12 tests.
 | `lib/state/cart.dart` | Enforce MOQ on additions/decrements and provide checkout validity state. |
 | `lib/screens/product_list_screen.dart` | Show applicable MOQ text and initialize card/detail quantities and decrement limits from the product MOQ. |
 | `lib/screens/cart_screen.dart` | Show applicable MOQ under each cart line; decrement at MOQ removes the line; guard checkout and announce the agreed validation message if invalid. |
-| `test/cart_test.dart` | Cover default/sample MOQs, add and decrement boundaries, and state validity. |
+| `test/cart_test.dart` | Cover default/sample MOQs, positive-MOQ validation, add and decrement boundaries, and state validity. |
 | `test/widget_test.dart` | Cover MOQ copy on cards, details, and cart lines; starting quantities and limits; line removal; and blocked/valid checkout behavior. |
 | `integration_test/app_test.dart` | Update the checkout flow to order products at their MOQ and assert the resulting quantity and total while retaining all four screenshot names and order. |
 | `README.md` | Document visible per-product minimums and their effect on ordering. |
 
 ## 7. Implementation steps
 1. Add the Product field with a default of 1 and set all sample catalog entries, including explicit values of 1 where no special MOQ applies.
-2. Update `Cart.add` and `Cart.decrement` to preserve the minimum-quantity invariant, then expose a read-only check for checkout validation.
+2. Validate that each product MOQ is positive in the state layer before mutating cart state, throwing `ArgumentError` for zero or negative values; update `Cart.add` and `Cart.decrement` to preserve the minimum-quantity invariant, then expose a read-only check for checkout validation.
 3. Update product cards and the detail sheet to show minimums above 1 and initialize/limit their selectors using the MOQ.
 4. Update cart rendering to show the applicable MOQ under each cart line, remove a line at the decrement boundary, and block invalid checkout with the agreed live-region message.
 5. Add focused model/state and widget tests, update the integration scenario and its expected totals, and document the user-visible behavior in `README.md`.
@@ -61,6 +61,7 @@ Baseline: `flutter pub get` succeeded; `flutter test` passed all 12 tests.
 | --- | --- | --- |
 | Each product has an MOQ; products without one default to 1. | `test/cart_test.dart`: `products default to a minimum order quantity of one`; verify each sample value in `sample catalog has the requested minimum order quantities`. | unit |
 | Sample catalog MOQs match the issue; other products remain at 1. | `test/cart_test.dart`: `sample catalog has the requested minimum order quantities`. | unit |
+| The state layer accepts MOQ 1 and rejects zero or negative MOQs with `ArgumentError` before changing the cart. | `test/cart_test.dart`: `rejects nonpositive product minimums without mutating the cart`; verify MOQ 1 is accepted and MOQ 0 and a negative MOQ are rejected with cart state unchanged. | unit |
 | Cards and detail sheet show “Minimum order: N cases/boxes” only when MOQ > 1. | `test/widget_test.dart`: `shows minimum order quantities on product cards and details only when above one`. | widget |
 | Detail selector starts at MOQ and cannot go lower. | `test/widget_test.dart`: `detail quantity starts at the minimum and cannot be decreased below it`. | widget |
 | First add adds at least MOQ; existing additions continue to merge. | `test/cart_test.dart`: `first add raises a below-minimum request to the minimum`; `add merges quantities for an existing line`. | unit |
@@ -85,3 +86,4 @@ N/A — review decisions resolved the questions about the card selector and chec
 - The checkout validation message is: “Some products are below their minimum order quantity. Update or remove them before checkout.”
 - Cart lines with MOQ > 1 show “Minimum order: N cases” or “Minimum order: N boxes”; add a widget test for this behavior.
 - The product owner approves the MOQ values specified in the issue.
+- The state layer rejects zero or negative product MOQs with `ArgumentError` before mutating cart state; test MOQ 1 acceptance and zero/negative rejection with the cart unchanged.
